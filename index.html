@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f3f0e8" /><meta name="description" content="A small arcade for your keyboard. Start with a single-word warm-up." />
+    <meta name="theme-color" content="#f3f0e8" /><meta name="description" content="A small arcade for your keyboard. Warm up with a gentle stream of falling words." />
     <link rel="icon" href="data:," /><title>Typing Arcade</title>
   </head>
   <body>
@@ -10,17 +10,17 @@
       <header><a class="brand" href="./" aria-label="Typing Arcade home"><span aria-hidden="true">ta</span>Typing Arcade</a><span class="header-note">SMALL WORDS. GOOD RHYTHM.</span></header>
       <main>
         <section id="start-screen" class="screen" aria-labelledby="start-title">
-          <div class="intro"><p class="eyebrow">TAKE YOUR FINGERS FOR A SPIN</p><h1 id="start-title">Find your<br /><span>flow state.</span></h1><p>A little focus. A little rhythm.<br />Start with a single-word warm-up.</p><button id="start" class="primary">Start warm-up <span aria-hidden="true">↗</span></button><p class="quiet">Your keyboard is all you need.</p></div>
+          <div class="intro"><p class="eyebrow">TAKE YOUR FINGERS FOR A SPIN</p><h1 id="start-title">Find your<br /><span>flow state.</span></h1><p>A little focus. A little rhythm.<br />Warm up with a gentle stream of falling words.</p><button id="start" class="primary">Start warm-up <span aria-hidden="true">↗</span></button><p class="quiet">Your keyboard is all you need.</p></div>
           <div class="key-art" aria-hidden="true"><div class="orbit-line"></div><div class="key key-t">t</div><div class="key key-y">y</div><div class="key key-p">p</div><div class="key key-e">e</div><span class="art-note">ONE KEY AT A TIME</span></div>
         </section>
         <section id="play-screen" class="screen play-screen" hidden aria-labelledby="play-title">
-          <div class="section-top"><p class="eyebrow" id="play-title">SINGLE-WORD WARM-UP</p><button id="back" class="text-button">Back to start</button></div>
-          <div class="playfield"><span class="field-label">YOUR WORD</span><p id="sample-word">orbit</p><span class="field-caption">Settle in. There’s no timer.</span></div>
-          <form id="practice-form"><label for="word-input">Type the word</label><div class="input-row"><input id="word-input" name="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="80" enterkeyhint="done" placeholder="Start typing…" aria-describedby="input-hint" /><button class="primary" type="submit">Finish warm-up <span aria-hidden="true">↗</span></button></div><p class="quiet" id="input-hint">Press Enter or choose Finish warm-up when you’re ready.</p></form>
+          <div class="section-top"><p class="eyebrow" id="play-title">FALLING-WORD WARM-UP</p><button id="back" class="text-button">Back to start</button></div>
+          <div class="playfield" role="region" aria-label="Falling words"><div id="falling-words"></div><span class="field-caption">Words drift past. Practice at your own pace.</span></div>
+          <form id="practice-form"><label for="word-input">Type a word you see</label><div class="input-row"><input id="word-input" name="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="80" enterkeyhint="done" placeholder="Start typing…" aria-describedby="input-hint" /><button class="primary" type="submit">Finish warm-up <span aria-hidden="true">↗</span></button></div><p class="quiet" id="input-hint">This warm-up is unscored. Press Enter or choose Finish warm-up when you’re ready.</p></form>
         </section>
         <section id="results-screen" class="results-screen" hidden aria-labelledby="results-title">
           <p class="eyebrow">A MOMENT WELL SPENT</p><div class="result-icon" aria-hidden="true">↗</div><h1 id="results-title">Nice warm-up.</h1><p>You showed up. That’s a good start.</p>
-          <div class="result-card"><div><span>Sample word</span><strong>orbit</strong></div><div><span>You typed</span><strong id="typed-result"></strong></div></div>
+          <div class="result-card"><div><span>Practice</span><strong>Falling words</strong></div><div><span>You typed</span><strong id="typed-result"></strong></div></div>
           <button id="restart" class="primary">Try again <span aria-hidden="true">↗</span></button><button id="home" class="text-button">Back to start</button>
         </section>
       </main>
