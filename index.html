@@ -15,12 +15,12 @@
         </section>
         <section id="play-screen" class="screen play-screen" hidden aria-labelledby="play-title">
           <div class="section-top"><p class="eyebrow" id="play-title">FALLING-WORD WARM-UP</p><button id="back" class="text-button">Back to start</button></div>
-          <div class="playfield" role="region" aria-label="Falling words"><div id="falling-words"></div><span class="field-caption">Words drift past. Practice at your own pace.</span></div>
-          <form id="practice-form"><label for="word-input">Type a word you see</label><div class="input-row"><input id="word-input" name="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="80" enterkeyhint="done" placeholder="Start typing…" aria-describedby="input-hint" /><button class="primary" type="submit">Finish warm-up <span aria-hidden="true">↗</span></button></div><p class="quiet" id="input-hint">This warm-up is unscored. Press Enter or choose Finish warm-up when you’re ready.</p></form>
+          <div class="scoreboard"><span>Score <strong id="score">0</strong></span><span>Words <strong id="completed">0</strong></span></div><div class="playfield" role="region" aria-label="Falling words"><div id="falling-words"></div><span class="field-caption">Finish a word before it drifts away. 10 points per letter.</span></div>
+          <form id="practice-form"><label for="word-input">Type a word you see</label><div class="input-row"><input id="word-input" name="word" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="80" enterkeyhint="done" placeholder="Start typing…" aria-describedby="input-hint typing-status" /><button class="primary" type="submit">Finish warm-up <span aria-hidden="true">↗</span></button></div><p class="quiet" id="input-hint">The first matching letter locks a word. Backspace fixes mistakes; clear the input to release it. Enter finishes your warm-up.</p><p class="quiet" id="typing-status" role="status"></p></form>
         </section>
         <section id="results-screen" class="results-screen" hidden aria-labelledby="results-title">
           <p class="eyebrow">A MOMENT WELL SPENT</p><div class="result-icon" aria-hidden="true">↗</div><h1 id="results-title">Nice warm-up.</h1><p>You showed up. That’s a good start.</p>
-          <div class="result-card"><div><span>Practice</span><strong>Falling words</strong></div><div><span>You typed</span><strong id="typed-result"></strong></div></div>
+          <div class="result-card"><div><span>Practice</span><strong>Falling words</strong></div><div><span>Score</span><strong id="result-score">0</strong></div><div><span>Words completed</span><strong id="result-completed">0</strong></div><div><span>Last word</span><strong id="typed-result"></strong></div></div>
           <button id="restart" class="primary">Try again <span aria-hidden="true">↗</span></button><button id="home" class="text-button">Back to start</button>
         </section>
       </main>

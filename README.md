@@ -2,7 +2,9 @@
 
 A typing warm-up that runs in the browser.
 
-Words fall through three lanes at a steady pace. Type a word you see, then press Enter or use the finish button to see what you typed. Restart clears the field and starts a fresh stream. This is an unscored warm-up: typing does not remove words yet. Words leave the field after eight seconds.
+Words fall through three lanes at a steady pace. The first matching letter locks a target, and correct letters are highlighted as you type. If several words start with that letter, the oldest one is selected. Backspace fixes a mistake; clearing the input releases the target. Letter case does not matter.
+
+Finishing a word removes it automatically and awards 10 points per letter. Words drift away after eight seconds; an unfinished target clears when it leaves. Press Enter or choose **Finish warm-up** to see your score and completed-word count. **Try again** starts a fresh round.
 
 ## Run locally
 
