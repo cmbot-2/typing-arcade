@@ -48,3 +48,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; border-top: 1
 .falling-word.targeted::after { border-color: #455b35; }
 .matched { color: #365b23; background: #cfeba7; border-radius: 3px; }
 #typing-status { min-height: 2.8em; color: #365b23; }
+.round-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; }
+.section-top { flex-wrap: wrap; }
+.pause-notice { padding: 14px 18px; border: 1px solid #adc78b; border-radius: 8px; background: #e1edcf; font-size: 14px; line-height: 1.6; }
+input:disabled { opacity: .65; }

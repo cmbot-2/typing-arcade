@@ -1,6 +1,7 @@
 import './style.css';
 import { expiredWordCount, wordsAt } from './falling-words';
 import { createRound, matchedLength, syncRound, typeInput } from './round';
+import { advanceClock, createClock, pauseClock, resumeClock } from './clock';
 
 type Screen = 'start' | 'play' | 'results';
 const screens: Record<Screen, HTMLElement> = {
@@ -18,17 +19,18 @@ const score = document.querySelector<HTMLElement>('#score')!;
 const completed = document.querySelector<HTMLElement>('#completed')!;
 const lives = document.querySelector<HTMLElement>('#lives')!;
 const feedback = document.querySelector<HTMLElement>('#typing-status')!;
+const pause = document.querySelector<HTMLButtonElement>('#pause')!;
+const pauseNotice = document.querySelector<HTMLElement>('#pause-notice')!;
 let round = createRound();
 let activeScreen: Screen = 'start';
 let frame: number | undefined;
-let previousTime: number | undefined;
-let elapsed = 0;
+let clock = createClock();
 
 function renderWords() {
-  const allWords = wordsAt(elapsed);
+  const allWords = wordsAt(clock.elapsed);
   const previousTarget = round.targetId;
   const previousLives = round.lives;
-  round = syncRound(round, allWords, expiredWordCount(elapsed));
+  round = syncRound(round, allWords, expiredWordCount(clock.elapsed));
   if (previousTarget !== null && round.targetId === null) {
     input.value = '';
     feedback.textContent = 'That word reached the bottom. Pick another word.';
@@ -66,32 +68,65 @@ function renderWords() {
   if (round.lives === 0 && activeScreen === 'play') finishRound();
 }
 
-function advanceClock(timestamp: number) {
-  if (previousTime !== undefined && !document.hidden) elapsed += Math.max(0, timestamp - previousTime);
-  previousTime = document.hidden ? undefined : Math.max(timestamp, previousTime ?? timestamp);
+function stopAnimation() {
+  if (frame !== undefined) cancelAnimationFrame(frame);
+  frame = undefined;
+}
+
+function renderPause() {
+  input.disabled = activeScreen !== 'play' || clock.paused;
+  pause.textContent = clock.paused ? 'Resume' : 'Pause';
+  pauseNotice.hidden = activeScreen !== 'play' || !clock.paused;
+}
+
+function pauseRound(automatic = false) {
+  if (activeScreen !== 'play' || clock.paused) return;
+  // A hidden page freezes at the last visible frame, even if its event was delayed.
+  clock = pauseClock(clock, automatic ? clock.previous ?? performance.now() : performance.now());
+  stopAnimation();
+  renderWords();
+  if (activeScreen !== 'play') return;
+  renderPause();
+  if (!document.hidden) pause.focus();
+}
+
+function resumeRound() {
+  if (activeScreen !== 'play' || !clock.paused || document.hidden) return;
+  clock = resumeClock(clock, performance.now());
+  input.value = round.input;
+  renderPause();
+  input.focus();
+  frame = requestAnimationFrame(animate);
 }
 
 function animate(timestamp: number) {
-  if (activeScreen !== 'play') return;
-  advanceClock(timestamp);
+  frame = undefined;
+  if (activeScreen !== 'play' || clock.paused) return;
+  if (document.hidden) { pauseRound(true); return; }
+  clock = advanceClock(clock, timestamp);
   renderWords();
-  if (activeScreen === 'play') frame = requestAnimationFrame(animate);
+  if (activeScreen === 'play' && !clock.paused) frame = requestAnimationFrame(animate);
 }
 
-document.addEventListener('visibilitychange', () => { previousTime = undefined; });
+pause.addEventListener('click', () => { if (clock.paused) resumeRound(); else pauseRound(); });
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || event.repeat || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || activeScreen !== 'play') return;
+  event.preventDefault();
+  if (clock.paused) resumeRound(); else pauseRound();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseRound(true);
+  else if (activeScreen === 'play' && clock.paused) pause.focus();
+});
+window.addEventListener('pagehide', () => pauseRound(true));
 
 function show(screen: Screen) {
   activeScreen = screen;
-  if (frame !== undefined) cancelAnimationFrame(frame);
-  frame = undefined;
-  previousTime = undefined;
+  stopAnimation();
+  clock = pauseClock(clock, clock.previous ?? performance.now());
   for (const [name, element] of Object.entries(screens)) element.hidden = name !== screen;
-  input.disabled = screen !== 'play';
-  if (screen === 'play') {
-    previousTime = performance.now();
-    input.focus();
-    frame = requestAnimationFrame(animate);
-  }
+  renderPause();
+  if (screen === 'play') resumeRound();
   if (screen === 'start') start.focus();
   if (screen === 'results') restart.focus();
 }
@@ -100,7 +135,7 @@ function startRound() {
   round = createRound();
   input.value = '';
   result.textContent = '';
-  elapsed = 0;
+  clock = createClock();
   wordElements.clear();
   wordLayer.replaceChildren();
   feedback.textContent = 'Type the first letter of a falling word to target it.';
@@ -111,18 +146,19 @@ function startRound() {
 start.addEventListener('click', startRound);
 restart.addEventListener('click', startRound);
 function handleInput() {
-  if (activeScreen !== 'play') return;
+  if (document.hidden) pauseRound(true);
+  if (activeScreen !== 'play' || clock.paused) { input.value = round.input; return; }
   // Settle expirations before scoring, even between animation frames.
   const value = input.value;
-  advanceClock(performance.now());
+  clock = advanceClock(clock, performance.now());
   renderWords();
   if (activeScreen !== 'play') return;
   // An expired target clears its partial input rather than retargeting it.
   if (value !== input.value) return;
   const previousCompleted = round.completed;
-  round = typeInput(round, wordsAt(elapsed), input.value);
+  round = typeInput(round, wordsAt(clock.elapsed), input.value);
   input.value = round.input;
-  const target = wordsAt(elapsed).find((word) => word.id === round.targetId);
+  const target = wordsAt(clock.elapsed).find((word) => word.id === round.targetId);
   feedback.textContent = round.completed > previousCompleted
     ? `${round.lastWord} complete! +${round.lastWord.length * 10} points.`
     : target
@@ -148,7 +184,9 @@ function finishRound() {
 document.querySelector<HTMLFormElement>('#practice-form')!.addEventListener('submit', (event) => {
   event.preventDefault();
   if (activeScreen !== 'play') return;
-  advanceClock(performance.now());
+  if (document.hidden) pauseRound(true);
+  clock = advanceClock(clock, performance.now());
   renderWords();
   if (activeScreen === 'play') finishRound();
 });
+renderPause();

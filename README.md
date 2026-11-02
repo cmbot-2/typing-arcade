@@ -8,6 +8,8 @@ Finishing a word removes it automatically and awards 10 points per letter. Each 
 
 At zero lives the round ends automatically, scoring stops, and your results appear. You can also press Enter or choose **Finish warm-up** to end early. **Try again** resets the score, completed words, and all three lives.
 
+Choose **Pause** or press **Esc** to hold the round; **Resume** or Esc continues from the same position with your partial input intact. Switching tabs automatically pauses. Returning keeps the game paused until you resume, so time away never moves words or costs lives. Typing is disabled while paused; you can still finish the round or return to the start screen.
+
 ## Run locally
 
 Use Node.js 20.19.x or Node.js 22.12+ and npm. From the repository folder:
