@@ -4,7 +4,9 @@ A typing warm-up that runs in the browser.
 
 Words fall through three lanes at a steady pace. The first matching letter locks a target, and correct letters are highlighted as you type. If several words start with that letter, the oldest one is selected. Backspace fixes a mistake; clearing the input releases the target. Letter case does not matter.
 
-Finishing a word removes it automatically and awards 10 points per letter. Words drift away after eight seconds; an unfinished target clears when it leaves. Press Enter or choose **Finish warm-up** to see your score and completed-word count. **Try again** starts a fresh round.
+Finishing a word removes it automatically and awards 10 points per letter. Each run starts with three lives. An unfinished word reaches the bottom after eight seconds and costs one life; its partial input clears if it was your target. Completed words never cost lives.
+
+At zero lives the round ends automatically, scoring stops, and your results appear. You can also press Enter or choose **Finish warm-up** to end early. **Try again** resets the score, completed words, and all three lives.
 
 ## Run locally
 

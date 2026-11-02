@@ -42,7 +42,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; border-top: 1
 @media (max-width: 720px) { .shell { padding: 0 22px; } .header-note { display: none; } header { height: 80px; } #start-screen { grid-template-columns: 1fr; padding: 36px 0; gap: 10px; } .key-art { max-width: 370px; width: 100%; height: 330px; margin: auto; } .key { width: 85px; height: 90px; font-size: 48px; }.key-p { top: 200px; } .screen { padding: 30px 0; } .input-row { flex-direction: column; } .input-row .primary { justify-content: center; } footer > span:last-child { display: none; } .results-screen h1 { font-size: 44px; } }
 @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
 
-.scoreboard { display: flex; gap: 24px; padding: 0 0 18px; font-size: 13px; color: #576648; }
+.scoreboard { display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 0 0 18px; font-size: 13px; color: #576648; }
 .scoreboard strong { margin-left: 8px; color: #28351f; font: 600 20px ui-monospace, monospace; }
 .falling-word.targeted { text-decoration: underline; text-underline-offset: 6px; }
 .falling-word.targeted::after { border-color: #455b35; }

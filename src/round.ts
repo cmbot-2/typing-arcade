@@ -7,18 +7,27 @@ export type Round = {
   completed: number;
   completedIds: number[];
   lastWord: string;
+  lives: number;
+  expiredSlots: number;
 };
 
 export function createRound(): Round {
-  return { targetId: null, input: '', score: 0, completed: 0, completedIds: [], lastWord: '' };
+  return { targetId: null, input: '', score: 0, completed: 0, completedIds: [], lastWord: '', lives: 3, expiredSlots: 0 };
 }
 
-export function syncRound(round: Round, words: FallingWord[]): Round {
+export function syncRound(round: Round, words: FallingWord[], expiredSlots = round.expiredSlots): Round {
+  if (round.lives === 0) return round;
+  const expired = Math.max(round.expiredSlots, expiredSlots);
+  const completedExpirations = round.completedIds.filter((id) => id >= round.expiredSlots && id < expired).length;
+  const missed = Math.max(0, expired - round.expiredSlots - completedExpirations);
+  const lives = Math.max(0, round.lives - missed);
   const targetExpired = round.targetId !== null && !words.some((word) => word.id === round.targetId);
   return {
     ...round,
-    targetId: targetExpired ? null : round.targetId,
-    input: targetExpired ? '' : round.input,
+    lives,
+    expiredSlots: expired,
+    targetId: targetExpired || lives === 0 ? null : round.targetId,
+    input: targetExpired || lives === 0 ? '' : round.input,
     // Remember only completed words whose spawn slots are still on screen.
     completedIds: round.completedIds.filter((id) => words.some((word) => word.id === id)),
   };
@@ -31,6 +40,7 @@ export function matchedLength(word: string, input: string): number {
 }
 
 export function typeInput(previous: Round, words: FallingWord[], value: string): Round {
+  if (previous.lives === 0) return previous;
   const round = syncRound(previous, words);
   if (!value) return { ...round, input: '', targetId: null };
   const available = words.filter((word) => !round.completedIds.includes(word.id));

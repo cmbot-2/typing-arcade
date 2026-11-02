@@ -1,5 +1,5 @@
 import './style.css';
-import { wordsAt } from './falling-words';
+import { expiredWordCount, wordsAt } from './falling-words';
 import { createRound, matchedLength, syncRound, typeInput } from './round';
 
 type Screen = 'start' | 'play' | 'results';
@@ -16,6 +16,7 @@ const wordLayer = document.querySelector<HTMLElement>('#falling-words')!;
 const wordElements = new Map<number, HTMLElement>();
 const score = document.querySelector<HTMLElement>('#score')!;
 const completed = document.querySelector<HTMLElement>('#completed')!;
+const lives = document.querySelector<HTMLElement>('#lives')!;
 const feedback = document.querySelector<HTMLElement>('#typing-status')!;
 let round = createRound();
 let activeScreen: Screen = 'start';
@@ -26,11 +27,13 @@ let elapsed = 0;
 function renderWords() {
   const allWords = wordsAt(elapsed);
   const previousTarget = round.targetId;
-  round = syncRound(round, allWords);
+  const previousLives = round.lives;
+  round = syncRound(round, allWords, expiredWordCount(elapsed));
   if (previousTarget !== null && round.targetId === null) {
     input.value = '';
-    feedback.textContent = 'That word drifted past. Pick another word.';
+    feedback.textContent = 'That word reached the bottom. Pick another word.';
   }
+  if (round.lives < previousLives) feedback.textContent = `Missed ${previousLives - round.lives} word(s). ${round.lives} lives left.`;
   const words = allWords.filter((word) => !round.completedIds.includes(word.id));
   for (const [id, element] of wordElements) {
     if (!words.some((word) => word.id === id)) {
@@ -59,14 +62,20 @@ function renderWords() {
   }
   score.textContent = String(round.score);
   completed.textContent = String(round.completed);
+  lives.textContent = String(round.lives);
+  if (round.lives === 0 && activeScreen === 'play') finishRound();
+}
+
+function advanceClock(timestamp: number) {
+  if (previousTime !== undefined && !document.hidden) elapsed += Math.max(0, timestamp - previousTime);
+  previousTime = document.hidden ? undefined : Math.max(timestamp, previousTime ?? timestamp);
 }
 
 function animate(timestamp: number) {
   if (activeScreen !== 'play') return;
-  if (previousTime !== undefined && !document.hidden) elapsed += timestamp - previousTime;
-  previousTime = document.hidden ? undefined : timestamp;
+  advanceClock(timestamp);
   renderWords();
-  frame = requestAnimationFrame(animate);
+  if (activeScreen === 'play') frame = requestAnimationFrame(animate);
 }
 
 document.addEventListener('visibilitychange', () => { previousTime = undefined; });
@@ -77,7 +86,9 @@ function show(screen: Screen) {
   frame = undefined;
   previousTime = undefined;
   for (const [name, element] of Object.entries(screens)) element.hidden = name !== screen;
+  input.disabled = screen !== 'play';
   if (screen === 'play') {
+    previousTime = performance.now();
     input.focus();
     frame = requestAnimationFrame(animate);
   }
@@ -101,6 +112,13 @@ start.addEventListener('click', startRound);
 restart.addEventListener('click', startRound);
 function handleInput() {
   if (activeScreen !== 'play') return;
+  // Settle expirations before scoring, even between animation frames.
+  const value = input.value;
+  advanceClock(performance.now());
+  renderWords();
+  if (activeScreen !== 'play') return;
+  // An expired target clears its partial input rather than retargeting it.
+  if (value !== input.value) return;
   const previousCompleted = round.completed;
   round = typeInput(round, wordsAt(elapsed), input.value);
   input.value = round.input;
@@ -118,11 +136,19 @@ input.addEventListener('input', (event) => { if (!event.isComposing) handleInput
 input.addEventListener('compositionend', handleInput);
 document.querySelector('#back')!.addEventListener('click', () => show('start'));
 document.querySelector('#home')!.addEventListener('click', () => show('start'));
-document.querySelector<HTMLFormElement>('#practice-form')!.addEventListener('submit', (event) => {
-  event.preventDefault();
-  if (activeScreen !== 'play') return;
+function finishRound() {
   result.textContent = round.lastWord || 'None yet';
+  document.querySelector('#results-title')!.textContent = round.lives === 0 ? 'Game over.' : 'Nice warm-up.';
+  document.querySelector('#result-reason')!.textContent = round.lives === 0
+    ? 'Three words reached the bottom. Ready for another round?' : `Warm-up finished with ${round.lives} lives left.`;
   document.querySelector('#result-score')!.textContent = String(round.score);
   document.querySelector('#result-completed')!.textContent = String(round.completed);
   show('results');
+}
+document.querySelector<HTMLFormElement>('#practice-form')!.addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (activeScreen !== 'play') return;
+  advanceClock(performance.now());
+  renderWords();
+  if (activeScreen === 'play') finishRound();
 });
