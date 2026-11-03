@@ -1,5 +1,5 @@
 import './style.css';
-import { expiredWordCount, wordsAt } from './falling-words';
+import { difficultyAt, expiredWordCount, wordsAt } from './falling-words';
 import { createRound, matchedLength, syncRound, typeInput } from './round';
 import { advanceClock, createClock, pauseClock, resumeClock } from './clock';
 
@@ -18,6 +18,7 @@ const wordElements = new Map<number, HTMLElement>();
 const score = document.querySelector<HTMLElement>('#score')!;
 const completed = document.querySelector<HTMLElement>('#completed')!;
 const lives = document.querySelector<HTMLElement>('#lives')!;
+const level = document.querySelector<HTMLElement>('#level')!;
 const feedback = document.querySelector<HTMLElement>('#typing-status')!;
 const pause = document.querySelector<HTMLButtonElement>('#pause')!;
 const pauseNotice = document.querySelector<HTMLElement>('#pause-notice')!;
@@ -65,6 +66,7 @@ function renderWords() {
   score.textContent = String(round.score);
   completed.textContent = String(round.completed);
   lives.textContent = String(round.lives);
+  level.textContent = String(difficultyAt(clock.elapsed).level);
   if (round.lives === 0 && activeScreen === 'play') finishRound();
 }
 
